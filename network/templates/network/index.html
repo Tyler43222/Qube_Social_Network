@@ -1,0 +1,112 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<!-- User profile information -->
+    {% if header %}
+        <div class="profile">
+            <div class="flex-center" style="padding-bottom: 20px; gap: 10px; flex-wrap: wrap;">
+                <img src="{% if profile_user.profile_photo %}{{ profile_user.profile_photo.url }}{% else %}/static/default-avatar.png{% endif %}" alt="" width="80" height="80" class="profile-image rounded-circle me-2 profile-tab">
+                <h1>{{ profile_user.username }}</h1>
+                <div class="flex-center" style="margin-left: 20px; gap: 20px; white-space: nowrap;">
+                    <span>Followers: {{ followers_count }}</span>
+                    <span>Following: {{ following_count }}</span>
+                </div>
+            </div>
+            <p class="profile-bio" style="padding-bottom: 20px;">{{ profile_user.biography }}</p>
+                <!-- Follow and unfollow feature -->
+            {% if user.is_authenticated and not current_user %}
+                <form method="post" action="{% url 'toggle_follow' profile_user.username %}">
+                    {% csrf_token %}
+                    {% if is_following %}
+                        <input type="submit" name="unfollow" value="Unfollow">
+                    {% else %}
+                        <input type="submit" name="follow" value="Follow">
+                    {% endif %}
+                </form>
+            {% endif %}
+        </div>
+    {% endif %}
+<!-- Profile settings for current user -->   
+    {% if user_profile_view and user.is_authenticated %}
+        <div class="settings"></div>
+    {% endif %}
+<!-- Post creation form -->
+    {% if create_field and user.is_authenticated %}
+        <div class="create-post profile-spacing post-style">
+            <div>
+                <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}/static/default-avatar.png{% endif %}" alt="" width="40" height="40" class="rounded-circle me-2 profile-tab">
+            </div>
+            <div>
+                <form  method="post" action="{% url 'create_post' %}" enctype="multipart/form-data">
+                    {% csrf_token %}
+                    <textarea name="post-content" rows="3" placeholder="Write a message" maxlength="1200" required></textarea><hr class="subtle">
+                    <div class="flex-wrap">
+                        <label class="upload-btn">
+                            Upload Image
+                            <input type="file" accept="image/*" name="post-image" id="file-input">
+                        </label>
+                        <span class="file-name"></span>
+                        <select name="category">
+                            <option value="">Select category</option>
+                            <option value="news">News</option>
+                            <option value="tech">Tech</option>
+                            <option value="entertainment">Entertainment</option>
+                            <option value="health">Health</option>
+                            <option value="nature">Nature</option>
+                            <option value="sports">Sports</option>
+                            <option value="education">Education</option>
+                            <option value="humor">Humor</option>
+                        </select>
+                        <input type="submit" value="Post" name="post-submit" class="post-btn">
+                    </div>
+                </form>
+            </div>
+        </div>
+    {% endif %}
+<!-- Categories buttons -->
+    {% if show_categories %}
+        <hr>
+        <div class="categories-container">
+            {% for category in categories %}
+                <div class="each-category">
+                    <a href="{% url 'category_view' category %}">
+                        <button type="button" class="category-btn category-{{ category }} {% if category == active_category %}active-category{% endif %}">{{ category|capfirst }}</button>
+                    </a>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+<!-- Search feature -->
+    {% if can_search %}
+        <div class="search">
+            <form method="get" action="{% url 'search' %}">
+                <input type="text" class="form-control search_input" name="q" placeholder="Search" maxlength="50" value="{{ search_query }}" autofocus>
+            </form>
+        </div>
+    {% endif %}
+    {% if not following_view %}<hr>{% endif %}
+    {% if empty %}
+        <div class="spacing">
+            <h4>No results for "{{ search_query }}"</h4>
+            <p class="grey">Try searching for something else</p>
+        </div>
+    {% endif %}
+<!-- Loads posts -->
+    <div class="posts-container" 
+        {% if posts.has_next %}data-next-page="{{ posts.next_page_number }}"{% endif %}
+        {% if profile_user %}data-base-url="{% url 'profile' profile_user.username %}"
+        {% elif following_view %}data-base-url="{% url 'following' %}"
+        {% elif can_search and search_query %}data-base-url="{% url 'search' %}?q={{ search_query|urlencode }}"
+        {% else %}data-base-url="{% url 'index' %}"{% endif %}>
+        {% if empty_following %} 
+            <h4>You're not following anyone</h4>
+        {% endif %}
+        {% for post in posts %}
+            <div class="post-style post-link list" data-post-id="{{ post.id }}" data-url="{% url 'post_details' post.id %}">
+                {% include "network/partials/buttons.html" with details=False %}
+            </div>
+        {% endfor %}
+    </div>
+
+{% endblock %}

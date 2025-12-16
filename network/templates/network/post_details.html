@@ -1,0 +1,68 @@
+{% extends "network/layout.html" %}
+{% load static %}
+
+{% block body %}
+<div class="posts-container" data-track-post-id="{{ post.id }}">
+    <div class="post-style post-link post-detail" data-post-id="{{ post.id }}">
+        {% include "network/partials/buttons.html" with details=True %}
+        <!-- Comment form -->
+        {% if user.is_authenticated %}
+            <hr>
+            <div class="create-post">
+                <div>
+                    <img src="{% if user.profile_photo %}{{ user.profile_photo.url }}{% else %}/static/default-avatar.png{% endif %}" alt="" width="40" height="40" class="rounded-circle me-2 profile-tab">
+                </div>
+                <div>
+                    <form method="post" action="{% url 'create_comment' post.id %}">
+                        {% csrf_token %}
+                        <div class="flex-wrap" style="align-items: flex-end; gap: 5px;">
+                            <textarea name="comment-content" rows="2" placeholder="Write a comment" maxlength="300" required></textarea>
+                            <input type="submit" value="Comment" name="comment-submit" class="comment-btn">
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+        <!-- Comments -->
+        <div class="comments-container" {% if comments.has_next %}data-next-page="{{ comments.next_page_number }}"{% endif %} data-post-id="{{ post.id }}">
+            {% for comment in comments %}
+                <div class="comments comment-style" data-comment-id="{{ comment.id }}">
+                    <hr>
+                    <div style="display: flex; align-items: stretch; gap: 20px;">
+                        <a href="{% url 'profile' comment.commenter.username %}" class="flex-center">
+                            <img src="{% if comment.commenter.profile_photo %}{{ comment.commenter.profile_photo.url }}{% else %}/static/default-avatar.png{% endif %}" alt="" width="40" height="40" class="rounded-circle me-2 profile-tab">
+                            <h2>{{ comment.commenter }}</h2>
+                        </a>
+                        <p class="grey">
+                            {% if comment.time_display == "0h" %}
+                                Now
+                            {% else %}
+                                {{ comment.time_display }}
+                            {% endif %}
+                        </p>
+                    </div>
+                    <div class="body-content">
+                        <p class="post-content">{{ comment.comment }}</p>
+                        <!-- Like and unlike comment feature -->
+                        <div class="container">
+                            <div class="group group-red">
+                                {% include "network/partials/like-btn.html" with type="comment" id=comment.id is_liked=comment.is_liked_by_user %}
+                                <div class="grey">
+                                    <p class="comment-like-count count">
+                                        {% if not user.is_authenticated and comment.id in request.session.liked_comments %}
+                                            {{ comment.liked_comment.count|add:1 }}
+                                        {% else %}
+                                            {{ comment.liked_comment.count }}
+                                        {% endif %}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+<script type="module" src="{% static 'network/engagement.js' %}"></script>
+{% endblock %}
