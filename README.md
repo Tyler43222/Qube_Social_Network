@@ -1,4 +1,4 @@
-## Qube — Social Network
+## Qube - Social Network
 
 Qube is a social network web app modeled after X/Twitter.
 
@@ -19,6 +19,7 @@ Qube is a social network web app modeled after X/Twitter.
 - Follow/unfollow users.
 - Post detail view with ranked comments + time-on-post engagement tracking.
 - Profile editing: upload/remove profile photo and add/edit biography.
+- Mobile responsive design.
 
 ### How ranking works
 This project computes a numeric rank and uses it for ordering:
@@ -33,7 +34,8 @@ This project computes a numeric rank and uses it for ordering:
   - Calculated in `network/views/algorithm.py::commentrank()`
   - Called when rendering the post detail page.
 
-Time-on-post engagement comes from the frontend:
+Time-on-post engagement:
+- Once a user clicks on a post and the post detail page loads, the browser tracks how long they spend on that page before clicking off. 
 - `network/static/network/engagement.js` periodically POSTs `{seconds: <elapsed>}` to `/post/<id>/track/`.
 - The server endpoint `network/views/algorithm.py::track_engagement()` increments `PostEngagement.engagement_time`.
 
@@ -88,7 +90,7 @@ python3 manage.py runserver
 
 Then open http://127.0.0.1:8000/
 
-## Database
+### Database
 Currently using SQLite for easy development/demo.
 
 To switch to PostgreSQL for deployment, update `project/settings.py`:
@@ -101,4 +103,3 @@ DATABASES = {
     }
 }
 ```
-
