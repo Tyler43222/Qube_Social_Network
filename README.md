@@ -14,7 +14,7 @@ Qube is a social network web app modeled after X/Twitter.
   - Category feed (ranked)
   - Search feed (ranked)
   - Following feed (ranked)
-  - User profile feed (chronological)
+  - User profile feed (reverse chronological)
 - Like/unlike posts and comments (supports anonymous likes via session storage).
 - Follow/unfollow users.
 - Post detail view with ranked comments + time-on-post engagement tracking.
