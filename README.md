@@ -60,7 +60,7 @@ Installed via `requirements.txt`:
 ### Setup
 ```bash
 git clone https://github.com/Tyler43222/Qube_Social_Network
-cd Blog
+cd Qube_Social_Network
 
 python3 -m venv .venv
 source .venv/bin/activate
